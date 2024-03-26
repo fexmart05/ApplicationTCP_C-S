@@ -3,45 +3,29 @@
  */
 
 package com.mycompany.mserver;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
+import java.util.Scanner;
 /**
  *
  * @author federico
  */
+
+
 public class MServer {
     public static void main(String[] args) {
-        final int SERVER_PORT = 12345; // Porta del server
+        Scanner scanner = new Scanner(System.in);
 
-        Server server = new Server(SERVER_PORT);
+        int port = 12345;
 
-        // Avvio del thread per la ricezione dei messaggi dal client
-        new Thread(() -> {
+        do {
             try {
-                String message;
-                while ((message = server.receiveMessage()) != null) {
-                    System.out.println("Client: " + message);
-                }
-            } catch (IOException e) {
-                System.err.println("Errore durante la ricezione dei messaggi dal client: " + e.getMessage());
-                server.close();
+                System.out.print("Inserisci un numero di porta valido in cui avviare il Server (0 - 65535): ");
+                port = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.err.println("Errore: hai inserito un valore non valido.");
             }
-        }).start();
+        } while (port < 0 || port > 65535);
 
-        // Lettura dei messaggi da tastiera e invio al client
-        try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in))) {
-            String message;
-            while ((message = inputReader.readLine()) != null) {
-                server.sendMessage(message);
-                if (message.equalsIgnoreCase("exit")) {
-                    server.close();
-                    break;
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Errore durante la lettura dei messaggi da tastiera: " + e.getMessage());
-            server.close();
-        }
+        Server server = new Server(port);
     }
 }
